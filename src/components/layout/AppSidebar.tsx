@@ -13,10 +13,10 @@ import {
   MapPin,
   Database,
   Receipt,
+  X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
 import { Separator } from "@/components/ui/separator";
 
 const managerNav = [
@@ -42,9 +42,15 @@ const bottomNavigation = [
   { name: "Cài đặt", href: "/settings", icon: Settings },
 ];
 
-export function AppSidebar() {
+interface AppSidebarProps {
+  isOpen: boolean;
+  onClose: () => void;
+  collapsed: boolean;
+  onToggleCollapse: () => void;
+}
+
+export function AppSidebar({ isOpen, onClose, collapsed, onToggleCollapse }: AppSidebarProps) {
   const location = useLocation();
-  const [collapsed, setCollapsed] = useState(false);
 
   const renderNavGroup = (items: typeof managerNav, label?: string) => (
     <>
@@ -59,6 +65,7 @@ export function AppSidebar() {
           <Link
             key={item.name}
             to={item.href}
+            onClick={onClose}
             className={cn(
               "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
               isActive
@@ -75,79 +82,104 @@ export function AppSidebar() {
   );
 
   return (
-    <aside
-      className={cn(
-        "flex flex-col bg-sidebar border-r border-sidebar-border transition-all duration-300",
-        collapsed ? "w-16" : "w-64"
+    <>
+      {/* Mobile overlay */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 bg-background/80 backdrop-blur-sm z-40 lg:hidden"
+          onClick={onClose}
+        />
       )}
-    >
-      {/* Logo */}
-      <div className="flex items-center h-16 px-4 border-b border-sidebar-border">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-sidebar-primary flex items-center justify-center">
-            <Warehouse className="w-5 h-5 text-sidebar-primary-foreground" />
+      
+      <aside
+        className={cn(
+          "flex flex-col bg-sidebar border-r border-sidebar-border transition-all duration-300 z-50",
+          // Mobile: fixed overlay
+          "fixed inset-y-0 left-0 lg:relative",
+          // Mobile visibility
+          isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
+          // Width
+          collapsed ? "lg:w-16 w-64" : "w-64"
+        )}
+      >
+        {/* Logo */}
+        <div className="flex items-center justify-between h-16 px-4 border-b border-sidebar-border">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-sidebar-primary flex items-center justify-center">
+              <Warehouse className="w-5 h-5 text-sidebar-primary-foreground" />
+            </div>
+            {!collapsed && (
+              <span className="font-semibold text-sidebar-foreground text-lg">
+                WMS Admin
+              </span>
+            )}
           </div>
-          {!collapsed && (
-            <span className="font-semibold text-sidebar-foreground text-lg">
-              WMS Admin
-            </span>
-          )}
+          {/* Mobile close button */}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onClose}
+            className="lg:hidden text-sidebar-muted hover:text-sidebar-foreground"
+          >
+            <X className="w-5 h-5" />
+          </Button>
         </div>
-      </div>
 
-      {/* Navigation */}
-      <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-        {renderNavGroup(managerNav, "Quản lý kho")}
-        
-        {!collapsed && <Separator className="my-4 bg-sidebar-border" />}
-        {collapsed && <div className="my-2" />}
-        
-        {renderNavGroup(adminNav, "Quản trị")}
-        
-        {!collapsed && <Separator className="my-4 bg-sidebar-border" />}
-        {collapsed && <div className="my-2" />}
-        
-        {renderNavGroup(accountantNav, "Kế toán")}
-      </nav>
+        {/* Navigation */}
+        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+          {renderNavGroup(managerNav, "Quản lý kho")}
+          
+          {!collapsed && <Separator className="my-4 bg-sidebar-border" />}
+          {collapsed && <div className="my-2" />}
+          
+          {renderNavGroup(adminNav, "Quản trị")}
+          
+          {!collapsed && <Separator className="my-4 bg-sidebar-border" />}
+          {collapsed && <div className="my-2" />}
+          
+          {renderNavGroup(accountantNav, "Kế toán")}
+        </nav>
 
-      {/* Bottom Navigation */}
-      <div className="px-3 py-4 border-t border-sidebar-border space-y-1">
-        {bottomNavigation.map((item) => {
-          const isActive = location.pathname === item.href;
-          return (
-            <Link
-              key={item.name}
-              to={item.href}
-              className={cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
-                isActive
-                  ? "bg-sidebar-accent text-sidebar-primary"
-                  : "text-sidebar-muted hover:bg-sidebar-accent hover:text-sidebar-foreground"
-              )}
-            >
-              <item.icon className="w-5 h-5 flex-shrink-0" />
-              {!collapsed && <span>{item.name}</span>}
-            </Link>
-          );
-        })}
+        {/* Bottom Navigation */}
+        <div className="px-3 py-4 border-t border-sidebar-border space-y-1">
+          {bottomNavigation.map((item) => {
+            const isActive = location.pathname === item.href;
+            return (
+              <Link
+                key={item.name}
+                to={item.href}
+                onClick={onClose}
+                className={cn(
+                  "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
+                  isActive
+                    ? "bg-sidebar-accent text-sidebar-primary"
+                    : "text-sidebar-muted hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                )}
+              >
+                <item.icon className="w-5 h-5 flex-shrink-0" />
+                {!collapsed && <span>{item.name}</span>}
+              </Link>
+            );
+          })}
 
-        {/* Collapse Button */}
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setCollapsed(!collapsed)}
-          className="w-full justify-start gap-3 px-3 py-2.5 text-sidebar-muted hover:bg-sidebar-accent hover:text-sidebar-foreground"
-        >
-          {collapsed ? (
-            <Menu className="w-5 h-5" />
-          ) : (
-            <>
-              <ChevronLeft className="w-5 h-5" />
-              <span>Thu gọn</span>
-            </>
-          )}
-        </Button>
-      </div>
-    </aside>
+          {/* Collapse Button - Desktop only */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onToggleCollapse}
+            className="w-full justify-start gap-3 px-3 py-2.5 text-sidebar-muted hover:bg-sidebar-accent hover:text-sidebar-foreground hidden lg:flex"
+          >
+            {collapsed ? (
+              <Menu className="w-5 h-5" />
+            ) : (
+              <>
+                <ChevronLeft className="w-5 h-5" />
+                <span>Thu gọn</span>
+              </>
+            )}
+          </Button>
+        </div>
+      </aside>
+    </>
   );
 }

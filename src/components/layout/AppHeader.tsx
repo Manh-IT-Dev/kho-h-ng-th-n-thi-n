@@ -1,4 +1,4 @@
-import { Bell, Search, User } from "lucide-react";
+import { Bell, Search, User, Menu } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,11 +12,25 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 
-export function AppHeader() {
+interface AppHeaderProps {
+  onMenuClick: () => void;
+}
+
+export function AppHeader({ onMenuClick }: AppHeaderProps) {
   return (
-    <header className="h-16 border-b border-border bg-card px-6 flex items-center justify-between">
+    <header className="h-16 border-b border-border bg-card px-4 lg:px-6 flex items-center justify-between gap-4">
+      {/* Mobile menu button */}
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={onMenuClick}
+        className="lg:hidden shrink-0"
+      >
+        <Menu className="w-5 h-5" />
+      </Button>
+
       {/* Search */}
-      <div className="relative w-96">
+      <div className="relative flex-1 max-w-md">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
         <Input
           placeholder="Tìm kiếm đơn hàng, sản phẩm..."
@@ -25,7 +39,7 @@ export function AppHeader() {
       </div>
 
       {/* Right Actions */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2 lg:gap-4">
         {/* Notifications */}
         <Button variant="ghost" size="icon" className="relative">
           <Bell className="w-5 h-5" />
@@ -37,13 +51,13 @@ export function AppHeader() {
         {/* User Menu */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="flex items-center gap-2">
+            <Button variant="ghost" className="flex items-center gap-2 px-2">
               <Avatar className="h-8 w-8">
                 <AvatarFallback className="bg-primary text-primary-foreground text-sm">
                   NV
                 </AvatarFallback>
               </Avatar>
-              <div className="text-left hidden sm:block">
+              <div className="text-left hidden md:block">
                 <p className="text-sm font-medium">Nguyễn Văn A</p>
                 <p className="text-xs text-muted-foreground">Quản lý kho</p>
               </div>
